@@ -1,27 +1,41 @@
+import processing.video.*;
+Capture cam;
+//PGraphics pg;  //PG is the graphics buffer for over the video
 int numOfSpiders = int(random(10, 25));
-PImage StarGazer;
 PImage Spider;
 String Score = "Score ";
 String Win = "WIN!!!!";
 int yourscore;
 //float rot = 0;
 Spider[] ourSpiders = new Spider[numOfSpiders];   //make a new array named Spiders
-//float rotation;
-//float Rcolor;
-//float Gcolor;
-//float Bcolor;
+//************* Do I need a boolean array to display these guys?  Or does it need to output into a new array every time I delete one?
 float scrollY;
 boolean mouseDown;
 float spiderXspeed;
 float spiderYspeed;
-float NearTheMouseX;
-float NearTheMouseY;
 Animation explosion1;
 
 void setup() {
-  size(800, 800);  
-  imageMode(CENTER);
-  StarGazer = loadImage("StarGazer.png");
+
+  String[] cameras = Capture.list();
+
+  if (cameras.length == 0) {
+    println("There are no cameras available for capture.");
+    exit();
+  } 
+  else {
+    // println("Available cameras:");
+    println("CAMERA IS GO");
+    //   for (int i = 0; i < cameras.length; i++) {
+    //println(cameras[i]);
+    // }
+
+    // The camera can be initialized directly using an 
+    // element from the array returned by list():
+    cam = new Capture(this, cameras[0]);
+    cam.start();
+  }  
+  size(640, 360);  
   imageMode(CENTER);
   Spider = loadImage("Spider.png");
   imageMode(CENTER);
@@ -39,76 +53,74 @@ void setup() {
 }
 
 void draw() {
-  NearTheMouseX = constrain(20, mouseX-10, mouseX+10);
-  NearTheMouseY = constrain(20, mouseY-10, mouseY+10);
-  background(255);  //commenting out leaves streaks
-  pushMatrix();
+  // background(255);  //commenting out leaves streaks, if no video
 
-  popMatrix();
+  if (cam.available() == true) {
+    cam.read();
+  }
+  image(cam, 0, 0);
+  // The following does the same, and is faster when just drawing the image
+  // without any additional resizing, transformations, or tint.
+  //set(0, 0, cam);
+
   for (int i=0; i < numOfSpiders; i++) {  //this for-loop actually draws the spiders
     ourSpiders[i].fly();
-    ourSpiders[i].display();
+    //only display a spider if it hasn't been killed.
+    // Maybe what I need is a boolean array of true and false for each spider on the list??
+    if (ourSpiders[i].isVisible) {
+      ourSpiders[i].display();
+      //yourscore++;
+      println("Your score = " + yourscore);
+    }
   }
-  fill(200);
+  fill(200);   //fill for the score box
   rect(4, 25, 133, 30, 7);  //box behind the score
   textSize(24);
   fill(15);
   if (yourscore < numOfSpiders) {
     text(Score + yourscore, 15, 50);
-  } else {
+  } 
+  else {
     text(Win, 15, 50);
   }
-  //imageMode(CORNER);
-  image(StarGazer, 720, 680);
-  //println(" mouseX = " + mouseX + " mouseY = " + mouseY );
 }
-
 
 class Spider { 
   float xpos;
   float ypos;
   float xspeed;
   float yspeed;
+  boolean isVisible;
 
   Spider(float tempXpos, float tempYpos, float tempXspeed, float tempYspeed) { 
     xpos = tempXpos;
     ypos = tempYpos;
     xspeed = tempXspeed;
     yspeed = tempYspeed;
+    isVisible = true;
   }
 
   void display() {
-    //if the mouse isn't within 30 pixels of the spider, kill it
+    //if the mouse is within 30 pixels of the spider, kill it
     if (mouseX >= xpos-5 && mouseY >= ypos-5 &&
       mouseX <= xpos+5 && mouseY >= ypos+5 ) {
       explosion1.display(xpos, ypos);
+      this.isVisible = false;
+      yourscore++;
       //println("You killed a spider");
-      if (yourscore < numOfSpiders) {
-        yourscore = yourscore + 1;
-        
-       // Here, I'd like to shorten the array of spiders... 
-      //... or better yet, delete the spider I just moused over. 
-      //When using an array of objects, the data returned from the function must be cast to the object array's data type. 
-      //For example: SomeClass[] items = (SomeClass[]) shorten(originalArray)
-       // ourSpiders[i].display();
-       //Spider[i] = (Spider[]) shorten(ourSpiders);
-       //"The type of expression must be an array type but it resolved to a PImage"
-      } 
-      else {
-        println("You win!");
-      }
     } 
     else {
-      image(Spider, xpos, ypos);
+      this.isVisible = true;
+      //println("You win!");
     }
-    //    println("xpos = " + xpos + " ypos = " + ypos);
-    // println("NearTheMouseX = " + NearTheMouseX + " NearTheMouseY + " + NearTheMouseY);
+    if (this.isVisible)
+      image(Spider, xpos, ypos);
   }
 
   void fly() {
     xpos = xpos + xspeed;
     ypos = ypos + yspeed;
-
+    /// Perhaps here is where the stage constraints can be set??
     if ((xpos > width) || (xpos < 0)) {
       // If the object reaches either edge, multiply speed by -1 to turn it around.
       xspeed = xspeed * -1;
@@ -121,19 +133,17 @@ class Spider {
 }
 
 
-
-void mouseDragged () {
-  mouseDown = true;
-  //println ("MouseDown!!!");
-}
-
-void mouseReleased () {
-  mouseDown = false;
-}
-
-void mouseClicked () {
-  if (mouseY >= 30 && mouseY <= 710) {  //&& mouseX >= 15 && mouseX <= 40
-    scrollY=mouseY;
-  }
-}
+//
+//void mouseDragged () {
+//  mouseDown = true;
+//  //println ("MouseDown!!!");
+//}
+//
+//void mouseReleased () {
+//  mouseDown = false;
+//}
+//
+//void mouseClicked () {
+//
+//}
 
