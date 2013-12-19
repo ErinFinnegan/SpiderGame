@@ -46,8 +46,8 @@ PFont font;
 void setup() {
   //size(640, 360);   //******************STAGE SIZE to MAX Camera Size*********************
   //size(1280, 720);   //My built in cam is this   
-  //size(800, 600);
-  size(1600, 1200);  //Logitech at school
+  size(800, 600);
+  //size(1600, 1200);  //Logitech at school
   frameRate(28);
   font = loadFont("Impact-48.vlw");
 
@@ -73,7 +73,7 @@ void setup() {
     // The camera can be initialized directly using an 
     // element from the array returned by list():
     //*****************CHANGE THE CAMERA NUMBER HERE ************************************************//
-    cam = new Capture(this, cameras[15]);  //camera 15 was the logitec at home/school
+    cam = new Capture(this, cameras[0]);  //camera 15 was the logitec at home/school
     cam.start();
   }  //end of camera loop
 
@@ -342,7 +342,4 @@ void keyPressed() {
     }
   }
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> added gif
