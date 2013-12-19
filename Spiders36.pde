@@ -342,3 +342,7 @@ void keyPressed() {
     }
   }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> added gif
