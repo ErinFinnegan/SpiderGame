@@ -37,16 +37,18 @@ int camnumber = -1;
 float idealRed; 
 float idealGreen; 
 float idealBlue;
-float threshold = 50;
+float threshold = 160;
 float ScratcherX = 0;
 float ScratcherY = 0;
 PFont font;
 
+final int SPIDERWIDTH = 171;
+final int SPIDERHEIGHT = 98;
 
 void setup() {
   //size(640, 360);   //******************STAGE SIZE to MAX Camera Size*********************
-  //size(1280, 720);   //My built in cam is this   
-  size(800, 600);
+  size(1280, 720);   //My built in cam is this   
+  //size(800, 600);
   //size(1600, 1200);  //Logitech at school
   frameRate(28);
   font = loadFont("Impact-48.vlw");
@@ -156,10 +158,10 @@ void draw() {
   if (mouseCounter >= 2) {
     bugs.trigger();
     for (int i=0; i < numOfSpiders; i++) {  //this for-loop actually draws the spiders
-      ourSpiders[i].fly();
       //only display a spider if it hasn't been killed.
       // Maybe what I need is a boolean array of true and false for each spider on the list??
       if (ourSpiders[i].isVisible) {
+        ourSpiders[i].fly();
         ourSpiders[i].display();
         //yourscore++;
         //println("Your score = " + yourscore);
@@ -178,11 +180,11 @@ void draw() {
   if (yourscore < numOfSpiders) {
     text(Score + yourscore, 15, 50);
   }
-  if (corner1x == 0 && mouseCounter == 1) {
+//  if (corner1x == 0 && mouseCounter == 1) {
     stroke(255);  //stage line
     noFill();
-    rect(corner1x, corner1y, rectwidth, rectheight);  // draw the stage, drawwww it
-  } 
+    rect(corner1x, corner1y, rectwidth, rectheight);  // draw the stage, drawwww it  draw the box on the person's back
+//  } 
   if (yourscore >= numOfSpiders) {
     //music.stop();
     splatter.stop();
@@ -228,9 +230,12 @@ class Spider {
 
   void display() {
     //if the mouse is within 30 pixels of the spider, kill it
-    if ((ScratcherX >= xpos-15 && ScratcherY >= ypos-15 &&
-      ScratcherX <= xpos+15 && ScratcherY >= ypos+15) || (mouseX >= xpos-15 && mouseY >= ypos-15 &&
-      mouseX <= xpos+15 && mouseY >= ypos+15)  ) {
+    float collideWidth = SPIDERWIDTH / 3;
+    float collideHeight = SPIDERHEIGHT / 3;
+    boolean mouseIsHitting = mouseX >= xpos-collideWidth && mouseX <= xpos+collideWidth && mouseY >= ypos-collideHeight && mouseY <= ypos+collideHeight;
+    boolean scratcherIsHitting = ScratcherX >= xpos-collideWidth && ScratcherX <= xpos+collideWidth && ScratcherY >= ypos-collideHeight && ScratcherY <= ypos+collideHeight;
+    
+    if (mouseIsHitting || scratcherIsHitting) {
       stroke(0);
       noFill();
       ellipse(ScratcherX, ScratcherY, 30, 30);
@@ -253,30 +258,61 @@ class Spider {
     }
   }
 
-  void fly() {
+  void fly() {    
     xpos = xpos + spiderXspeed;   // they fly up if subtracting, down if adding
-    ypos = ypos + spiderYspeed;  
-    if (xpos > (corner1x + rectwidth) || xpos > width) {  //if the spider's currect position is outside of rect, fly towards the rect
+    ypos = ypos + spiderYspeed;
+  
+    //x logic  
+    float randx = random(corner1x, corner1x+rectwidth);
+    if (xpos > randx) {  //if the spider's currect position is outside of rect, fly towards the rect
+      spiderXspeed = spiderXspeed - 1;
+    }
+    if (xpos < randx) {  //if the spider's currect position is outside of rect, fly towards the rect
+      spiderXspeed = spiderXspeed + 1;
+    }
+    //if (xpos < 0) {
+    //  xpos = 2;
+    //}
+    
+    //y logic
+    float randy = random(corner1y, corner1y+rectheight);
+    if (ypos > randy) {  //if the spider's currect position is outside of rect, fly towards the rect
+      spiderYspeed = spiderYspeed - 1;
+    }
+    if (ypos < randy) {  //if the spider's currect position is outside of rect, fly towards the rect
+      spiderYspeed = spiderYspeed + 1;
+    }
+    
+    //caps
+    spiderXspeed = min(6, spiderXspeed);
+    spiderYspeed = min(6, spiderYspeed);    
+    
+    //if (ypos < 0) {
+    //  ypos = 2;
+    //}
+    
+    /** erin's old logic **/
+    /*if (xpos > (corner1x + rectwidth) || xpos > width) {  //if the spider's currect position is outside of rect, fly towards the rect
       spiderXspeed = spiderXspeed - 1;
     }
     if (xpos < corner1x) {  //if the spider's currect position is outside of rect, fly towards the rect
       spiderXspeed = spiderXspeed + 1;
     }
-    if (xpos < 0) {
-      xpos = 2;
-    }
     if (ypos > rectheight) {  //if the spider's currect position is outside of rect, fly towards the rect
       spiderYspeed = spiderYspeed - 1;
     }
-    if (ypos < (rectheight - corner1y)) {  //if the spider's currect position is outside of rect, fly towards the rect
+    // if (ypos < (rectheight - corner1y)) {  //if the spider's currect position is outside of rect, fly towards the rect
+    if (ypos < corner1y) { 
       spiderYspeed = spiderYspeed + 1;
     }
     if (ypos < 0) {  //if ypose is less than zero come back!!
       ypos = 2;
-    }
-    if (ypos < 100) {  //if ypose is less than zero come back!!
-      ypos = 200;
-    }
+    }*/
+    /** end erin's old logic **/
+    
+    //if (ypos < 100) {  //if ypose is less than zero come back!!
+    //  ypos = 200;
+   // }
     //    if (spiderXspeed == 0 || spiderYspeed == 0) {
     //      spiderXspeed = spiderXspeed + 1;
     //      spiderYspeed = spiderYspeed + 1;
